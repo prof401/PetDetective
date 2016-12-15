@@ -8,6 +8,10 @@ public class Cell {
 	private Cell down;
 	private Cell left;
 	private Cell right;
+	public Cell(char initialContent) {
+		content = initialContent;
+	}
+	
 	public char getContent() {
 		return content;
 	}
