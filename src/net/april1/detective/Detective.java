@@ -1,13 +1,20 @@
 package net.april1.detective;
 
+import java.util.Arrays;
 import java.util.Set;
 
 public class Detective {
 	private final static String[] DEFAULTMAP = { "A.B.g.f", ". . . .", "c.C.D.E", ".     .", "F.j.0. ", ". . . .",
 			"b.G h e", "  . .  ", "H.I.i.J", ". .   .", "d.k.K.a" };
 	private final static int DEFAULTMOVES = 32;
+	private final static boolean DEBUG = false;
 
-	Set<Cell> map = new java.util.HashSet<Cell>();
+	private Set<Cell> cellSet = new java.util.HashSet<Cell>();
+	private int maxMoves = -1;
+	private int numberOfPets = -1;
+	private int[] petStatus;
+	private Set<Character> car;
+	private char[] moves;
 
 	public Detective() {
 		this(DEFAULTMAP, DEFAULTMOVES);
@@ -15,12 +22,18 @@ public class Detective {
 
 	public Detective(String[] map, int moves) {
 		Cell[][] cellArray = createCells(map);
+		updatePath(map, cellArray);
+		maxMoves = moves;
+	}
+
+	private void updatePath(String[] map, Cell[][] cellArray) {
 		int maxRow = cellArray.length - 1;
 		int maxCol = cellArray[0].length - 1;
 		int rowCounter = 0;
 		for (Cell[] row : cellArray) {
 			int colCounter = 0;
 			for (Cell cell : row) {
+				cellSet.add(cell);
 				// UP
 				if (rowCounter > 0 && map[(2 * rowCounter) - 1].charAt((2 * colCounter)) == '.') {
 					cell.setUp(cellArray[rowCounter - 1][colCounter]);
@@ -41,26 +54,10 @@ public class Detective {
 			}
 			rowCounter++;
 		}
-		Cell testCell = cellArray[1][0];
-		if (testCell.getUp() == null)
-			System.out.println("NULL");
-		else
-			System.out.println("NOT NULL");
-		if (testCell.getDown() == null)
-			System.out.println("NULL");
-		else
-			System.out.println("NOT NULL");
-		if (testCell.getLeft() == null)
-			System.out.println("NULL");
-		else
-			System.out.println("NOT NULL");
-		if (testCell.getRight() == null)
-			System.out.println("NULL");
-		else
-			System.out.println("NOT NULL");
 	}
 
 	private Cell[][] createCells(String[] map) {
+		Set<Character> pets = new java.util.HashSet<Character>();
 		int rowCount = (map.length + 1) / 2;
 		int colCount = (map[0].length() + 1) / 2;
 		Cell[][] arrayMap = new Cell[rowCount][colCount];
@@ -69,14 +66,133 @@ public class Detective {
 			for (int col = 0; col < colCount; col++) {
 				char colChar = rowString.charAt(col * 2);
 				arrayMap[row][col] = new Cell(colChar);
+				if (Character.isUpperCase(colChar)) {
+					pets.add(colChar);
+				}
 			}
 		}
+		numberOfPets = pets.size();
 		return arrayMap;
 	}
 
-	public static void main(String[] args) {
-		Detective detect = new Detective();
+	public void findSolutions() {
+		long startTime = System.currentTimeMillis();
+		petStatus = new int[numberOfPets];
+		moves = new char[maxMoves];
+		for (int cnt = 0; cnt < numberOfPets; cnt++) {
+			petStatus[cnt] = 2;
+		}
+		car = new java.util.HashSet<Character>(4);
+		Cell start = findStart();
 
+		nextCell(start, 0);
+		System.out.println(System.currentTimeMillis() - startTime);
+	}
+
+	private Cell findStart() {
+		Cell start = null;
+		for (Cell cell : cellSet) {
+			if (cell.getContent() == '0') {
+				start = cell;
+			}
+		}
+		return start;
+	}
+
+	private void nextCell(Cell cell, int move) {
+		if (cell == null)
+			return;
+
+		char content = cell.getContent();
+		boolean pickup = false;
+		if (canPickup(content)) {
+			petStatus[content - 'A']--;
+			car.add(content);
+			pickup = true;
+		}
+
+		boolean dropoff = false;
+		if (canDropoff(content)) {
+			petStatus[content - 'a']--;
+			car.remove(Character.toUpperCase(content));
+			dropoff = true;
+		}
+
+		if (move == maxMoves) {
+			boolean success = true;
+			for (int status : petStatus) {
+				if (status != 0) {
+					success = false;
+				}
+			}
+			if (success) {
+				System.out.println(moves);
+			}
+		} else {
+			moves[move] = 'U';
+			nextCell(cell.getUp(), move + 1);
+			moves[move] = 'D';
+			nextCell(cell.getDown(), move + 1);
+			moves[move] = 'L';
+			nextCell(cell.getLeft(), move + 1);
+			moves[move] = 'R';
+			nextCell(cell.getRight(), move + 1);
+			moves[move] = ' ';
+		}
+
+		if (dropoff) {
+			car.add(Character.toUpperCase(content));
+			petStatus[content - 'a']++;
+		}
+
+		if (pickup) {
+			car.remove(content);
+			petStatus[content - 'A']++;
+		}
+	}
+
+	private boolean canDropoff(char content) {
+		boolean dropoff = false;
+		if (Character.isLowerCase(content)) {
+			if (car.contains(Character.toUpperCase(content))) {
+				dropoff = true;
+			}
+		}
+		return dropoff;
+	}
+
+	private boolean canPickup(char content) {
+		boolean pickup = false;
+		if (Character.isUpperCase(content)) {
+			if (car.size() < 4) {
+				if (petStatus[content - 'A'] == 2) {
+					pickup = true;
+				}
+			}
+		}
+		return pickup;
+	}
+
+	public static void main(String[] args) {
+		/*
+		 * Detective simple1 = new Detective(new String[] { "A.B. ", ". . .",
+		 * " .0 b", "  . .", " . .a" }, 6); simple1.findSolutions();
+		 */
+		/*
+		 * Detective simple9 = new Detective(new String[] { "A.c e", ". . .",
+		 * "B C.D", ".   .", "a 0.b", ". . .", " .f.E", ". . .", " .d.F" }, 17);
+		 * simple9.findSolutions();
+		 */
+		Detective simple13 = new Detective(new String[] { "A.g.f", ". . .", "e B.C", ". . .", "D 0.E", ". . .", "F.d  ",
+				"  . .", "b.G h", ". . .", "a.c.H" }, 21);
+		simple13.findSolutions();
+
+		Detective simple17 = new Detective(new String[] { "g.h.b.f", ".   .  ", "A.a.c.B", ". . . .", "i.C 0  ",
+				".   . .", "D.e.E F", ". . .  ", " .d.G. ", ". . . .", "H.j.I.J" }, 30);
+		simple17.findSolutions();
+
+		Detective detective = new Detective();
+		detective.findSolutions();
 	}
 
 }
