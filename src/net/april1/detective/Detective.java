@@ -1,12 +1,12 @@
 package net.april1.detective;
 
-import java.util.Arrays;
 import java.util.Set;
 
 public class Detective {
 	private final static String[] DEFAULTMAP = { "A.B.g.f", ". . . .", "c.C.D.E", ".     .", "F.j.0. ", ". . . .",
 			"b.G h e", "  . .  ", "H.I.i.J", ". .   .", "d.k.K.a" };
 	private final static int DEFAULTMOVES = 32;
+	@SuppressWarnings("unused")
 	private final static boolean DEBUG = false;
 
 	private Set<Cell> cellSet = new java.util.HashSet<Cell>();
@@ -15,6 +15,7 @@ public class Detective {
 	private int[] petStatus;
 	private Set<Character> car;
 	private char[] moves;
+	private int movesNeeded = -1;
 
 	public Detective() {
 		this(DEFAULTMAP, DEFAULTMOVES);
@@ -82,6 +83,8 @@ public class Detective {
 		for (int cnt = 0; cnt < numberOfPets; cnt++) {
 			petStatus[cnt] = 2;
 		}
+		movesNeeded = numberOfPets * 2;
+
 		car = new java.util.HashSet<Character>(4);
 		Cell start = findStart();
 
@@ -104,51 +107,51 @@ public class Detective {
 			return;
 
 		char content = cell.getContent();
-		boolean pickup = false;
-		if (canPickup(content)) {
-			petStatus[content - 'A']--;
-			car.add(content);
-			pickup = true;
-		}
 
-		boolean dropoff = false;
 		if (canDropoff(content)) {
 			petStatus[content - 'a']--;
+			movesNeeded--;
 			car.remove(Character.toUpperCase(content));
-			dropoff = true;
-		}
 
-		if (move == maxMoves) {
-			boolean success = true;
-			for (int status : petStatus) {
-				if (status != 0) {
-					success = false;
-				}
-			}
-			if (success) {
+			if (movesNeeded == 0) {
 				System.out.println(moves);
+			} else {
+				nextMove(cell, move);
 			}
-		} else {
-			moves[move] = 'U';
-			nextCell(cell.getUp(), move + 1);
-			moves[move] = 'D';
-			nextCell(cell.getDown(), move + 1);
-			moves[move] = 'L';
-			nextCell(cell.getLeft(), move + 1);
-			moves[move] = 'R';
-			nextCell(cell.getRight(), move + 1);
-			moves[move] = ' ';
-		}
 
-		if (dropoff) {
 			car.add(Character.toUpperCase(content));
 			petStatus[content - 'a']++;
-		}
+			movesNeeded++;
+		} else {
+			if (canPickup(content)) {
+				petStatus[content - 'A']--;
+				movesNeeded--;
+				car.add(content);
 
-		if (pickup) {
-			car.remove(content);
-			petStatus[content - 'A']++;
+				nextMove(cell, move);
+
+				car.remove(content);
+				petStatus[content - 'A']++;
+				movesNeeded++;
+			}
+			if ((movesNeeded + move <= maxMoves)) {
+				nextMove(cell, move);
+			}
 		}
+	}
+
+	private void nextMove(Cell cell, int move) {
+		if (move == maxMoves)
+			return;
+		moves[move] = 'U';
+		nextCell(cell.getUp(), move + 1);
+		moves[move] = 'D';
+		nextCell(cell.getDown(), move + 1);
+		moves[move] = 'L';
+		nextCell(cell.getLeft(), move + 1);
+		moves[move] = 'R';
+		nextCell(cell.getRight(), move + 1);
+		moves[move] = ' ';
 	}
 
 	private boolean canDropoff(char content) {
@@ -178,21 +181,65 @@ public class Detective {
 		 * Detective simple1 = new Detective(new String[] { "A.B. ", ". . .",
 		 * " .0 b", "  . .", " . .a" }, 6); simple1.findSolutions();
 		 */
-		/*
-		 * Detective simple9 = new Detective(new String[] { "A.c e", ". . .",
-		 * "B C.D", ".   .", "a 0.b", ". . .", " .f.E", ". . .", " .d.F" }, 17);
-		 * simple9.findSolutions();
-		 */
-		Detective simple13 = new Detective(new String[] { "A.g.f", ". . .", "e B.C", ". . .", "D 0.E", ". . .", "F.d  ",
-				"  . .", "b.G h", ". . .", "a.c.H" }, 21);
-		simple13.findSolutions();
 
-		Detective simple17 = new Detective(new String[] { "g.h.b.f", ".   .  ", "A.a.c.B", ". . . .", "i.C 0  ",
-				".   . .", "D.e.E F", ". . .  ", " .d.G. ", ". . . .", "H.j.I.J" }, 30);
-		simple17.findSolutions();
+//		Detective simple9 = new Detective(
+//				new String[] { 
+//						"A.c e", 
+//						". . .", 
+//						"B C.D", 
+//						".   .", 
+//						"a 0.b", 
+//						". . .", 
+//						" .f.E", 
+//						". . .", 
+//						" .d.F" }, 17);
+//		simple9.findSolutions();
 
-		Detective detective = new Detective();
-		detective.findSolutions();
+//		Detective simple13 = new Detective(new String[] { 
+//				"A.g.f", 
+//				". . .", 
+//				"e B.C", 
+//				". . .", 
+//				"D 0.E", 
+//				". . .", 
+//				"F.d  ",
+//				"  . .", 
+//				"b.G h", 
+//				". . .", 
+//				"a.c.H" }, 21);
+//		simple13.findSolutions();
+
+//		Detective simple17 = new Detective(new String[] { 
+//				"g.h.b.f", 
+//				".   .  ", 
+//				"A.a.c.B", 
+//				". . . .", 
+//				"i.C 0  ",
+//				".   . .", 
+//				"D.e.E F", 
+//				". . .  ", 
+//				" .d.G. ", 
+//				". . . .", 
+//				"H.j.I.J" }, 30);
+//		simple17.findSolutions();
+
+		Detective simple19 = new Detective(new String[] { 
+				"A.B.g.f", 
+				". . . .", 
+				"c.C.D.E", 
+				".     .", 
+				"F.j.0. ",
+				". . . .", 
+				"b.G h e", 
+				"  . .  ", 
+				"H.I.i.J", 
+				". .   .", 
+				"d.k.K.a" }, 32);
+		simple19.findSolutions();
+
+		// Detective detective = new Detective();
+		// detective.findSolutions();
+		System.out.println("DONE");
 	}
 
 }
