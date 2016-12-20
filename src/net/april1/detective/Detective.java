@@ -123,7 +123,9 @@ public class Detective {
 			petStatus[content - 'a']++;
 			movesNeeded++;
 		} else {
+			boolean pickup = false;
 			if (canPickup(content)) {
+				pickup = true;
 				petStatus[content - 'A']--;
 				movesNeeded--;
 				car.add(content);
@@ -135,21 +137,25 @@ public class Detective {
 				movesNeeded++;
 			}
 			if ((movesNeeded + move <= maxMoves)) {
-				nextMove(cell, move);
+				nextMove(cell, move, !pickup);
 			}
 		}
 	}
 
 	private void nextMove(Cell cell, int move) {
+		nextMove(cell, move, true);
+	}
+
+	private void nextMove(Cell cell, int move, boolean upper) {	
 		if (move == maxMoves)
 			return;
-		moves[move] = 'U';
+		moves[move] = upper?'U':'u';
 		nextCell(cell.getUp(), move + 1);
-		moves[move] = 'D';
+		moves[move] = upper?'D':'d';
 		nextCell(cell.getDown(), move + 1);
-		moves[move] = 'L';
+		moves[move] = upper?'L':'l';
 		nextCell(cell.getLeft(), move + 1);
-		moves[move] = 'R';
+		moves[move] = upper?'R':'r';
 		nextCell(cell.getRight(), move + 1);
 		moves[move] = ' ';
 	}
@@ -224,17 +230,17 @@ public class Detective {
 //		simple17.findSolutions();
 
 		Detective simple19 = new Detective(new String[] { 
-				"A.B.g.f", 
+				"A.b B.C", 
 				". . . .", 
-				"c.C.D.E", 
-				".     .", 
-				"F.j.0. ",
+				"D.E.F.G", 
+				"  . . .", 
+				"H.I.J. ",
 				". . . .", 
-				"b.G h e", 
-				"  . .  ", 
-				"H.I.i.J", 
+				"g.a.0.K", 
 				". .   .", 
-				"d.k.K.a" }, 32);
+				"h f.j d", 
+				".   . .", 
+				"i.c.e.k" }, 35);
 		simple19.findSolutions();
 
 		// Detective detective = new Detective();
