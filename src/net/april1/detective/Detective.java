@@ -3,8 +3,18 @@ package net.april1.detective;
 import java.util.Set;
 
 public class Detective {
-	private final static String[] DEFAULTMAP = { "A.B.g.f", ". . . .", "c.C.D.E", ".     .", "F.j.0. ", ". . . .",
-			"b.G h e", "  . .  ", "H.I.i.J", ". .   .", "d.k.K.a" };
+	private final static String[] DEFAULTMAP = {
+			"A.a.B. ",
+			". . . .",
+			"c.D E. ",
+			". . . .",
+			"e.f.g.h",
+			".     .",
+			"H.0.I.J",
+			"      .",
+			"d.j.F.C",
+			". .   .",
+			"i. .G.b" };
 	private final static int DEFAULTMOVES = 32;
 	@SuppressWarnings("unused")
 	private final static boolean DEBUG = false;
@@ -229,20 +239,47 @@ public class Detective {
 //				"H.j.I.J" }, 30);
 //		simple17.findSolutions();
 
-		Detective simple19 = new Detective(new String[] { 
-				"A.b B.C", 
-				". . . .", 
-				"D.E.F.G", 
-				"  . . .", 
-				"H.I.J. ",
-				". . . .", 
-				"g.a.0.K", 
-				". .   .", 
-				"h f.j d", 
-				".   . .", 
-				"i.c.e.k" }, 35);
-		simple19.findSolutions();
+//		Detective simple19 = new Detective(new String[] {
+//				"A.b B.C",
+//				". . . .",
+//				"D.E.F.G",
+//				"  . . .",
+//				"H.I.J. ",
+//				". . . .",
+//				"g.a.0.K",
+//				". .   .",
+//				"h f.j d",
+//				".   . .",
+//				"i.c.e.k" }, 35);
+//		simple19.findSolutions();
 
+		Detective simple21 = new Detective(new String[] {
+				"A.a.j. ",
+				". . . .",
+				"B.g c. ",
+				". . . .",
+				"C.D.E.F",
+				".     .",
+				"f.0.i.h",
+				"      .",
+				"G.H.d.b",
+				". .   .",
+				"I. .e.J" }, 31);
+		simple21.findSolutions();
+
+		Detective simple22 = new Detective(new String[] {
+				"A.d.B.C",
+				".     .",
+				"j.D h.E",
+				". . .  ",
+				"F 0 G. ",
+				". .   .",
+				"f.e.a.H",
+				". . . .",
+				"I.b.g.J",
+				". . . .",
+				"K.k.c.i" }, 32);
+		simple22.findSolutions();
 		// Detective detective = new Detective();
 		// detective.findSolutions();
 		System.out.println("DONE");
